@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaDeNominas.Server", "
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "sistemadenominas.client", "sistemadenominas.client\sistemadenominas.client.esproj", "{9A0A6C9A-0B84-4D07-AFBB-0DE3EFD25AD6}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "BDNominas", "BDNominas\BDNominas.sqlproj", "{7CED0CB7-F47E-4E90-953F-7996E2C95336}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,12 @@ Global
 		{9A0A6C9A-0B84-4D07-AFBB-0DE3EFD25AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A0A6C9A-0B84-4D07-AFBB-0DE3EFD25AD6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9A0A6C9A-0B84-4D07-AFBB-0DE3EFD25AD6}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7CED0CB7-F47E-4E90-953F-7996E2C95336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CED0CB7-F47E-4E90-953F-7996E2C95336}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CED0CB7-F47E-4E90-953F-7996E2C95336}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{7CED0CB7-F47E-4E90-953F-7996E2C95336}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CED0CB7-F47E-4E90-953F-7996E2C95336}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CED0CB7-F47E-4E90-953F-7996E2C95336}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
