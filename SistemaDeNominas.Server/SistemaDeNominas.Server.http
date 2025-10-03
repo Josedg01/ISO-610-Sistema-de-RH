@@ -2,7 +2,7 @@
 
 GET {{SistemaDeNominas.Server_HostAddress}}/weatherforecast/
 
-
+GET {{SistemaDeNominas.Server_HostAddress}}/Empleados/
 Accept: application/json
 
 ###

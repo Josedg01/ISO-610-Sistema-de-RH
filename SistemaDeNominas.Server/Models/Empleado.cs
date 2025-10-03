@@ -14,7 +14,7 @@ namespace SistemaDeNominas.Server.Models
 
         public int idPuesto {  get; set; }
 
-        public int SalarioMensual { get; set; }
+        public decimal SalarioMensual { get; set; }
 
         public int idNomina { get; set;  }
 
