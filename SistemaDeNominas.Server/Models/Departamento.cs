@@ -5,11 +5,11 @@ namespace SistemaDeNominas.Server.Models
     public class Departamento
     {
         [Key]
-        public int Identificador { get; set; }
+        public int id { get; set; }
         public string Nombre { get; set; }
 
-        public string Ubi_Fisica { get; set; }
+        public string UbicacionFisica { get; set; }
 
-        public string Resp_de_Area { get; set; }  
+        public int idResponsableArea { get; set; }  
     }
 }

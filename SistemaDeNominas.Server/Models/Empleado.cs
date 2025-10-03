@@ -5,18 +5,18 @@ namespace SistemaDeNominas.Server.Models
     public class Empleado
     {
         [Key]
-        public int identificador {  get; set; }
+        public int id {  get; set; }
 
-        public int Cedula   { get; set; }
+        public string Cedula   { get; set; }
         public string Nombre { get; set; }
 
-        public string Departamento { get; set; }
+        public int idDepartamento { get; set; }
 
-        public string Puesto {  get; set; }
+        public int idPuesto {  get; set; }
 
-        public int Salario { get; set; }
+        public int SalarioMensual { get; set; }
 
-        public int Ident_Nomina { get; set;  }
+        public int idNomina { get; set;  }
 
 
     }

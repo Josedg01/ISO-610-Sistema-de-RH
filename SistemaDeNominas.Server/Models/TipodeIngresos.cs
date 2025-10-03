@@ -5,9 +5,9 @@ namespace SistemaDeNominas.Server.Models
     public class TipodeIngresos
     {
         [Key]
-        public int Identificador {  get; set; }
+        public int id {  get; set; }
         public string Nombre { get; set; }
-        public int Dep_de_Salario {  get; set; }
+        public int idEmpleado {  get; set; }
         public string Estado {  get; set; }
     }
 }

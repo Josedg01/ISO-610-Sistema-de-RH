@@ -6,14 +6,14 @@ namespace SistemaDeNominas.Server.Models
     {
         [Key]
 
-        public int Identificador { get; set; }  
+        public int id { get; set; }  
 
-        public int Nombre { get; set; } 
+        public string Nombre { get; set; } 
 
-        public int Nivel_Riesgo { get; set; }   
+        public int NivelDeRiesgo { get; set; }   
 
-        public float Niv_Mn_Salario     { get; set; }
+        public float MinimoSalario { get; set; }
 
-        public float Niv_Mx_Salario { get; set; }
+        public float MaximoSalario { get; set; }
     }
 }
