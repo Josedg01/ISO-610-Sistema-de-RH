@@ -44,7 +44,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
@@ -57,13 +57,15 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="dbo" />
-    <Folder Include="squema" />
-    <Folder Include="squema\Tablas" />
+    <Folder Include="schema" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="squema\Tablas\Departamentos.sql" />
-    <Build Include="squema\Tablas\Empleados.sql" />
-    <Build Include="squema\Tablas\Puestos.sql" />
-    <Build Include="squema\Tablas\TiposDeIngreso.sql" />
+    <Build Include="Pre-Deployment.sql" />
+    <Build Include="schema\Departamentos.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="schema\Empleados.sql" />
+    <Build Include="schema\Puestos.sql" />
+    <Build Include="schema\TiposDeIngreso.sql" />
   </ItemGroup>
 </Project>
