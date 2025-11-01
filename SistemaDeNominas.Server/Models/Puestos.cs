@@ -10,10 +10,10 @@ namespace SistemaDeNominas.Server.Models
 
         public string Nombre { get; set; } 
 
-        public int NivelDeRiesgo { get; set; }   
+        public int NivelDeRiesgo { get; set; }
 
-        public float MinimoSalario { get; set; }
+        public decimal MinimoSalario { get; set; }
 
-        public float MaximoSalario { get; set; }
+        public decimal MaximoSalario { get; set; }
     }
 }

@@ -8,10 +8,10 @@ namespace SistemaDeNominas.Server.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<Departamento> Departametos { get; set; }
         public DbSet<Puestos> Puestos { get; set; }
+        public DbSet<TipodeIngresos> TiposDeIngresos { get; set; }
 
     }
 }

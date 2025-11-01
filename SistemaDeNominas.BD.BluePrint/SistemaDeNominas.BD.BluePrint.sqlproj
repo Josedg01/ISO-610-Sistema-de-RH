@@ -61,12 +61,14 @@
     <Folder Include="schema" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Pre-Deployment.sql" />
     <Build Include="schema\Departamentos.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="schema\Empleados.sql" />
     <Build Include="schema\Puestos.sql" />
     <Build Include="schema\TiposDeIngreso.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Pre-Deployment.sql" />
   </ItemGroup>
 </Project>

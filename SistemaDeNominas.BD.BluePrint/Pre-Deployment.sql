@@ -9,13 +9,13 @@
 
 
 -- Crea la base de datos si no existe.
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'RecursosHumanos')
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Nominas')
 BEGIN
-	CREATE DATABASE RecursosHumanos;
-	PRINT 'Base de datos RecursosHumanos creada';
+	CREATE DATABASE Nominas;
+	PRINT 'Base de datos Nominas creada';
 END
 
-USE RecursosHumanos;
+USE Nominas;
 
 -- Crea cada una de las tablas.
 IF NOT EXISTS (
