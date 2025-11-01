@@ -8,6 +8,7 @@
           <router-link to="/departamentos">Departamentos</router-link>
           <router-link to="/puestos">Puestos</router-link>
           <router-link to="/ingresos">Tipos de Ingresos</router-link>
+          <router-link to="/deducciones">Deducciones</router-link>
         </nav>
       </div>
     </header>

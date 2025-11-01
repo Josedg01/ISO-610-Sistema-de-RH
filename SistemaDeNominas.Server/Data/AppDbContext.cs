@@ -12,6 +12,7 @@ namespace SistemaDeNominas.Server.Data
         public DbSet<Departamento> Departametos { get; set; }
         public DbSet<Puestos> Puestos { get; set; }
         public DbSet<TipodeIngresos> TiposDeIngresos { get; set; }
+        public DbSet<TipodeDeduccion> TiposDeDeducciones { get; set; }
 
     }
 }

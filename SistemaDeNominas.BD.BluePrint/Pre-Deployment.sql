@@ -9,13 +9,13 @@
 
 
 -- Crea la base de datos si no existe.
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Nominas')
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Nomina')
 BEGIN
-	CREATE DATABASE Nominas;
-	PRINT 'Base de datos Nominas creada';
+	CREATE DATABASE Nomina;
+	PRINT 'Base de datos Nomina creada';
 END
 
-USE Nominas;
+USE Nomina;
 
 -- Crea cada una de las tablas.
 IF NOT EXISTS (
@@ -88,4 +88,23 @@ BEGIN
         [Estado] NVARCHAR(64) NOT NULL
     )
     PRINT 'Tabla TiposDeIngreso creada'
+END
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'dbo'
+      AND TABLE_NAME = 'TiposDeDeduccion'
+)
+BEGIN
+    CREATE TABLE [dbo].[TiposDeDeduccion]
+    (
+	    [Id] INT NOT NULL PRIMARY KEY IDENTITY(1,1), 
+        [Nombre] NVARCHAR(64) NOT NULL, 
+        [Descripcion] NVARCHAR(256) NULL,
+        [MontoFijo] DECIMAL(18, 2) NULL,
+        [Porcentaje] DECIMAL(5, 2) NULL,
+        [Estado] NVARCHAR(64) NOT NULL DEFAULT 'Activo'
+    )
+    PRINT 'Tabla TiposDeDeduccion creada'
 END

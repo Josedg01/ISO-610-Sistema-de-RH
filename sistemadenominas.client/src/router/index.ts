@@ -25,6 +25,11 @@ const routes = [
     path: '/ingresos',
     name: 'Tipos de Ingresos',
     component: () => import('../views/GestionIngresos.vue')
+  },
+  {
+    path: '/deducciones',
+    name: 'Tipos de Deducciones',
+    component: () => import('../views/GestionDeducciones.vue')
   }
 ];
 
