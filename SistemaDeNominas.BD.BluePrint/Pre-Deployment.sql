@@ -66,8 +66,8 @@ BEGIN
     (
 	    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, 
         [Nombre] VARCHAR(64) NOT NULL, 
-        [NivelDeRiesgo] INT NOT NULL, 
-        [MinimoSalario] MONEY NOT NULL DEFAULT 14161.00, 
+        [NivelDeRiesgo] SMALLINT NOT NULL, 
+        [MinimoSalario] MONEY NOT NULL DEFAULT 14161.00,
         [MaximoSalario] MONEY NOT NULL
     )
     PRINT 'Tabla Puestos creada'

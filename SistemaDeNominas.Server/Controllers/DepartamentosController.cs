@@ -19,7 +19,7 @@ namespace SistemaDeNominas.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // Usamos "Departamentos" como se definió en AppDbContext
+            // Usamos "Departametos" como se definió en AppDbContext
             return Ok(await _db.Departamentos.ToListAsync());
         }
 

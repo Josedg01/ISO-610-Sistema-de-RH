@@ -9,7 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Connection string (LocalDB - Visual Studio)
 
 
-builder.Services.AddControllers();
+// Configura los controladores para que NO usen camelCase en la serialización de JSON.
+// Esto hace que las propiedades PascalCase de C# (ej: Nombre) se mantengan como
+// PascalCase en el JSON (ej: "Nombre"), coincidiendo con lo que espera el frontend de Vue.
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
 "Server=(localdb)\\MSSQLLocalDB;Database=Nomina;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;";

@@ -8,9 +8,9 @@ namespace SistemaDeNominas.Server.Models
 
         public int id { get; set; }  
 
-        public string Nombre { get; set; } 
+        public string Nombre { get; set; }
 
-        public int NivelDeRiesgo { get; set; }
+        public short NivelDeRiesgo { get; set; }
 
         public decimal MinimoSalario { get; set; }
 
