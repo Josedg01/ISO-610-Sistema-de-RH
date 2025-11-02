@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-"Server=(localdb)\\ProjectModels;Database=EmployeeManagementDb;Trusted_Connection=True;TrustServerCertificate=True;";
+"Server=(localdb)\\MSSQLLocalDB;Database=Nomina;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;";
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 

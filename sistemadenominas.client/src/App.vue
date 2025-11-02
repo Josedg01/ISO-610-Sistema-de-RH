@@ -9,6 +9,7 @@
           <router-link to="/puestos">Puestos</router-link>
           <router-link to="/ingresos">Tipos de Ingresos</router-link>
           <router-link to="/deducciones">Deducciones</router-link>
+          <router-link to="/transacciones">Transacciones</router-link>
         </nav>
       </div>
     </header>

@@ -108,3 +108,25 @@ BEGIN
     )
     PRINT 'Tabla TiposDeDeduccion creada'
 END
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'dbo'
+      AND TABLE_NAME = 'Transacciones'
+)
+BEGIN
+    CREATE TABLE [dbo].[Transacciones]
+    (
+	    [Id] INT NOT NULL PRIMARY KEY IDENTITY(1,1), 
+        [idEmpleado] INT NOT NULL,
+        [Tipo] NVARCHAR(50) NOT NULL, -- 'Ingreso' o 'Deduccion'
+        [ConceptoId] INT NOT NULL, 
+        [Descripcion] NVARCHAR(256) NULL,
+        [Monto] DECIMAL(18, 2) NOT NULL,
+        [Fecha] DATE NOT NULL,
+        [Estado] NVARCHAR(50) NOT NULL DEFAULT 'Pendiente',
+        CONSTRAINT [FK_Transacciones_Empleados] FOREIGN KEY ([idEmpleado]) REFERENCES [dbo].[Empleados]([Id])
+    )
+    PRINT 'Tabla Transacciones creada'
+END
