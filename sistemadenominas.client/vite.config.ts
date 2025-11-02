@@ -47,7 +47,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '^/(weatherforecast|Empleados|Departamentos|Puestos|TiposDeIngresos|TiposDeDeducciones|Transacciones)': {
+      '^/(weatherforecast|Empleados|Departamentos|Puestos|TiposDeIngresos|TiposDeDeducciones|Transacciones|CalculoNomina)': {
         target,
         secure: false
       }

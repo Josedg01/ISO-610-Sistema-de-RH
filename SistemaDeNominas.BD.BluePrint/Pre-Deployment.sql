@@ -44,8 +44,8 @@ IF NOT EXISTS (
 BEGIN
     CREATE TABLE [dbo].[Empleados]
     (
-	    [Id] INT NOT NULL PRIMARY KEY, 
-        [Cedula] NCHAR(11) NOT NULL, 
+        [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [Cedula] NCHAR(11) NOT NULL,
         [Nombre] VARCHAR(64) NOT NULL, 
         [SalarioMensual] NUMERIC NOT NULL, 
         [idDepartamento] INT NOT NULL, 
@@ -129,4 +129,45 @@ BEGIN
         CONSTRAINT [FK_Transacciones_Empleados] FOREIGN KEY ([idEmpleado]) REFERENCES [dbo].[Empleados]([Id])
     )
     PRINT 'Tabla Transacciones creada'
+END
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'dbo'
+      AND TABLE_NAME = 'Nominas'
+)
+BEGIN
+    CREATE TABLE [dbo].[Nominas]
+    (
+        [Id] INT NOT NULL PRIMARY KEY IDENTITY(1,1), 
+        [FechaInicio] DATE NOT NULL, 
+        [FechaFin] DATE NOT NULL, 
+        [FechaCreacion] DATETIME NOT NULL DEFAULT GETDATE(),
+        [Estado] NVARCHAR(50) NOT NULL DEFAULT 'Calculada',
+        [TotalCalculado] DECIMAL(18, 2) NOT NULL DEFAULT 0.00
+    )
+    PRINT 'Tabla Nominas creada'
+END
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'dbo'
+      AND TABLE_NAME = 'NominaDetalles'
+)
+BEGIN
+    CREATE TABLE [dbo].[NominaDetalles]
+    (
+        [Id] INT NOT NULL PRIMARY KEY IDENTITY(1,1), 
+        [idNomina] INT NOT NULL,
+        [idEmpleado] INT NOT NULL,
+        [SalarioBase] DECIMAL(18, 2) NOT NULL,
+        [TotalIngresos] DECIMAL(18, 2) NOT NULL,
+        [TotalDeducciones] DECIMAL(18, 2) NOT NULL,
+        [NetoAPagar] DECIMAL(18, 2) NOT NULL,
+        CONSTRAINT [FK_NominaDetalles_Nominas] FOREIGN KEY ([idNomina]) REFERENCES [dbo].[Nominas]([Id]),
+        CONSTRAINT [FK_NominaDetalles_Empleados] FOREIGN KEY ([idEmpleado]) REFERENCES [dbo].[Empleados]([Id])
+    )
+    PRINT 'Tabla NominaDetalles creada'
 END

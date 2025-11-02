@@ -10,10 +10,10 @@
           <router-link to="/ingresos">Tipos de Ingresos</router-link>
           <router-link to="/deducciones">Deducciones</router-link>
           <router-link to="/transacciones">Transacciones</router-link>
+          <router-link to="/nomina" class="link-nomina-calculo">Calcular Nómina</router-link>
         </nav>
       </div>
     </header>
-
     <main>
       <router-view />
     </main>
@@ -74,5 +74,10 @@
     padding: 2rem;
     margin: 0 auto;
     width: 100%;
+  }
+
+  .link-nomina-calculo {
+    background-color: hsla(160, 100%, 37%, 0.2);
+    font-weight: bold;
   }
 </style>

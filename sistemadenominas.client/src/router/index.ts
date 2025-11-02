@@ -35,6 +35,11 @@ const routes = [
     path: '/transacciones',
     name: 'Transacciones',
     component: () => import('../views/GestionTransacciones.vue')
+  },
+  {
+    path: '/nomina',
+    name: 'Nómina',
+    component: () => import('../views/CalcularNomina.vue')
   }
 ];
 

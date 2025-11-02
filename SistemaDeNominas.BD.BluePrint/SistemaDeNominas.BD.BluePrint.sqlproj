@@ -70,5 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Pre-Deployment.sql" />
+    <None Include="Seed.sql" />
   </ItemGroup>
 </Project>
