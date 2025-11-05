@@ -28,21 +28,28 @@ namespace SistemaDeNominas.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Empleado empleado)
         {
+            var verificar = await _db.Empleados.FirstOrDefaultAsync(e => e.Cedula == empleado.Cedula);
+
+            if (verificar != null)
+            {
+                return Conflict("Ya el usuario existe");
+            }
+
             _db.Empleados.Add(empleado);
             await _db.SaveChangesAsync();
-
-           // EF ya actualizó empleado.Identificador con el valor generado en la DB
+            // EF ya actualizó empleado.Identificador con el valor generado en la DB
             return CreatedAtAction(nameof(Get), new { id = empleado.id }, empleado);
+
+
         }
 
+       
 
 
 
 
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
+
+
 
 
 
