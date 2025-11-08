@@ -49,9 +49,9 @@
         <tbody>
           <tr v-for="empleado in empleados" :key="empleado.id">
             <td>{{ empleado.id }}</td>
-            <td>{{ empleado.Nombre }}</td>
-            <td>{{ empleado.Cedula }}</td>
-            <td>{{ empleado.SalarioMensual.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' }) }}</td>
+            <td>{{ empleado.nombre }}</td>
+            <td>{{ empleado.cedula }}</td>
+            <td>{{ empleado.salarioMensual.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' }) }}</td>
             <td>
               <button class="btn-secondary">Editar</button>
               <button class="btn-danger">Eliminar</button>

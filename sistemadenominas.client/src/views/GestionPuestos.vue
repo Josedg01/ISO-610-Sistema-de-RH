@@ -42,10 +42,10 @@
         <tbody>
           <tr v-for="puesto in puestos" :key="puesto.id">
             <td>{{ puesto.id }}</td>
-            <td>{{ puesto.Nombre }}</td>
-            <td>{{ puesto.NivelDeRiesgo }}</td>
-            <td>{{ formatCurrency(puesto.MinimoSalario) }}</td>
-            <td>{{ formatCurrency(puesto.MaximoSalario) }}</td>
+            <td>{{ puesto.nombre }}</td>
+            <td>{{ puesto.nivelDeRiesgo }}</td>
+            <td>{{ formatCurrency(puesto.minimoSalario) }}</td>
+            <td>{{ formatCurrency(puesto.maximoSalario) }}</td>
             <td>
               <button class="btn-secondary">Editar</button>
               <button class="btn-danger">Eliminar</button>

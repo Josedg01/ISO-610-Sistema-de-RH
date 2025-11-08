@@ -37,8 +37,8 @@
         <tbody>
           <tr v-for="depto in departamentos" :key="depto.id">
             <td>{{ depto.id }}</td>
-            <td>{{ depto.Nombre }}</td>
-            <td>{{ depto.UbicacionFisica }}</td>
+            <td>{{ depto.nombre }}</td>
+            <td>{{ depto.ubicacionFisica }}</td>
             <td>{{ depto.idResponsableArea }}</td>
             <td>
               <button class="btn-secondary">Editar</button>

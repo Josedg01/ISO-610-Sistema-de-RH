@@ -19,14 +19,14 @@ namespace SistemaDeNominas.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // Usamos "Departametos" como se definió en AppDbContext
-            return Ok(await _db.Departametos.ToListAsync());
+            // Usamos "Departamentos" como se definió en AppDbContext
+            return Ok(await _db.Departamentos.ToListAsync());
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var depto = await _db.Departametos.FindAsync(id);
+            var depto = await _db.Departamentos.FindAsync(id);
             if (depto == null) return NotFound("Departamento no encontrado.");
             return Ok(depto);
         }
@@ -34,7 +34,7 @@ namespace SistemaDeNominas.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Departamento depto)
         {
-            _db.Departametos.Add(depto);
+            _db.Departamentos.Add(depto);
             await _db.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = depto.id }, depto);
         }
@@ -47,7 +47,7 @@ namespace SistemaDeNominas.Server.Controllers
                 return BadRequest("El ID del departamento no coincide.");
             }
 
-            var d = await _db.Departametos.FindAsync(id);
+            var d = await _db.Departamentos.FindAsync(id);
             if (d == null)
             {
                 return NotFound("Departamento no encontrado.");
@@ -57,7 +57,7 @@ namespace SistemaDeNominas.Server.Controllers
             d.UbicacionFisica = depto.UbicacionFisica;
             d.idResponsableArea = depto.idResponsableArea;
 
-            _db.Departametos.Update(d);
+            _db.Departamentos.Update(d);
             await _db.SaveChangesAsync();
             return Ok(d);
         }
@@ -65,13 +65,13 @@ namespace SistemaDeNominas.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var d = await _db.Departametos.FindAsync(id);
+            var d = await _db.Departamentos.FindAsync(id);
             if (d == null)
             {
                 return NotFound("Departamento no encontrado.");
             }
 
-            _db.Departametos.Remove(d);
+            _db.Departamentos.Remove(d);
             await _db.SaveChangesAsync();
             return NoContent();
         }

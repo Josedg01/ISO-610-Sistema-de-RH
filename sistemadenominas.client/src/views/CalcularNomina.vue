@@ -35,11 +35,11 @@
         </thead>
         <tbody>
           <tr v-for="nomina in nominas" :key="nomina.Id">
-            <td>{{ nomina.Id }}</td>
-            <td>{{ formatDate(nomina.FechaInicio) }} - {{ formatDate(nomina.FechaFin) }}</td>
-            <td>{{ new Date(nomina.FechaCreacion).toLocaleString() }}</td>
-            <td>{{ formatCurrency(nomina.TotalCalculado) }}</td>
-            <td>{{ nomina.Estado }}</td>
+            <td>{{ nomina.id }}</td>
+            <td>{{ formatDate(nomina.fechaInicio) }} - {{ formatDate(nomina.fechaFin) }}</td>
+            <td>{{ new Date(nomina.fechaCreacion).toLocaleString() }}</td>
+            <td>{{ formatCurrency(nomina.totalCalculado) }}</td>
+            <td>{{ nomina.estado }}</td>
             <td>
               <button class="btn-secondary" @click="verDetalle(nomina.Id)">Ver Detalle</button>
             </td>
@@ -50,7 +50,7 @@
     </div>
 
     <div class="card list-card" v-if="nominaSeleccionada">
-      <h3>Detalle de Nómina #{{ nominaSeleccionada.Id }}</h3>
+      <h3>Detalle de Nómina #{{ nominaSeleccionada.id }}</h3>
       <div v-if="loading.detalle" class="loading">Cargando detalle...</div>
       <table v-if="!loading.detalle && nominaSeleccionada.Detalles.length > 0">
         <thead>
@@ -66,11 +66,11 @@
         <tbody>
           <tr v-for="detalle in nominaSeleccionada.Detalles" :key="detalle.Id">
             <td>{{ detalle.idEmpleado }}</td>
-            <td>{{ detalle.Empleado ? detalle.Empleado.Nombre : 'N/A' }}</td>
-            <td>{{ formatCurrency(detalle.SalarioBase) }}</td>
-            <td>{{ formatCurrency(detalle.TotalIngresos) }}</td>
-            <td>{{ formatCurrency(detalle.TotalDeducciones) }}</td>
-            <td><strong>{{ formatCurrency(detalle.NetoAPagar) }}</strong></td>
+            <td>{{ detalle.empleado ? detalle.empleado.nombre : 'N/A' }}</td>
+            <td>{{ formatCurrency(detalle.salarioBase) }}</td>
+            <td>{{ formatCurrency(detalle.totalIngresos) }}</td>
+            <td>{{ formatCurrency(detalle.totalDeducciones) }}</td>
+            <td><strong>{{ formatCurrency(detalle.netoAPagar) }}</strong></td>
           </tr>
         </tbody>
       </table>
