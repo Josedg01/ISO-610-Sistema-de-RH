@@ -64,11 +64,11 @@ IF NOT EXISTS (
 BEGIN
     CREATE TABLE [dbo].[Puestos]
     (
-	    [Id] INT NOT NULL PRIMARY KEY, 
+	    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, 
         [Nombre] VARCHAR(64) NOT NULL, 
-        [NivelDeRiesgo] SMALLINT NOT NULL, 
+        [NivelDeRiesgo] INT NOT NULL, 
         [MinimoSalario] MONEY NOT NULL DEFAULT 14161.00, 
-        [MaximoSalario] INT NOT NULL
+        [MaximoSalario] MONEY NOT NULL
     )
     PRINT 'Tabla Puestos creada'
 END
@@ -80,7 +80,7 @@ IF NOT EXISTS (
       AND TABLE_NAME = 'TiposDeIngreso'
 )
 BEGIN
-    CREATE TABLE [dbo].[TiposDeIngreso]
+    CREATE TABLE [dbo].[TiposDeIngresos]
     (
 	    [Id] INT NOT NULL PRIMARY KEY, 
         [Nombre] NVARCHAR(64) NOT NULL, 
@@ -97,7 +97,7 @@ IF NOT EXISTS (
       AND TABLE_NAME = 'TiposDeDeduccion'
 )
 BEGIN
-    CREATE TABLE [dbo].[TiposDeDeduccion]
+    CREATE TABLE [dbo].[TiposDeDeducciones]
     (
 	    [Id] INT NOT NULL PRIMARY KEY IDENTITY(1,1), 
         [Nombre] NVARCHAR(64) NOT NULL, 

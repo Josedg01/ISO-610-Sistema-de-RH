@@ -46,10 +46,10 @@
         <tbody>
           <tr v-for="deduccion in deducciones" :key="deduccion.id">
             <td>{{ deduccion.id }}</td>
-            <td>{{ deduccion.Nombre }}</td>
-            <td>{{ formatCurrency(deduccion.MontoFijo) }}</td>
-            <td>{{ deduccion.Porcentaje ? deduccion.Porcentaje + '%' : 'N/A' }}</td>
-            <td>{{ deduccion.Estado }}</td>
+            <td>{{ deduccion.nombre }}</td>
+            <td>{{ formatCurrency(deduccion.montoFijo) }}</td>
+            <td>{{ deduccion.porcentaje ? deduccion.porcentaje + '%' : 'N/A' }}</td>
+            <td>{{ deduccion.estado }}</td>
             <td>
               <button class="btn-secondary">Editar</button>
               <button class="btn-danger">Eliminar</button>

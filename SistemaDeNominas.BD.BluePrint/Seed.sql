@@ -54,12 +54,12 @@ GO
 
 -- 5. Insertar Puestos
 -- (Tu esquema no usa IDENTITY)
-INSERT INTO [dbo].[Puestos] ([Id], [Nombre], [NivelDeRiesgo], [MinimoSalario], [MaximoSalario])
+INSERT INTO [dbo].[Puestos] ([Nombre], [NivelDeRiesgo], [MinimoSalario], [MaximoSalario])
 VALUES
-(1, 'Gerente de TI', 3, 150000.00, 250000.00),
-(2, 'Desarrollador Senior', 2, 90000.00, 160000.00),
-(3, 'Analista de RRHH', 1, 45000.00, 75000.00),
-(4, 'Contador Senior', 2, 55000.00, 95000.00);
+('Gerente de TI', 3, 150000.00, 250000.00),
+('Desarrollador Senior', 2, 90000.00, 160000.00),
+('Analista de RRHH', 1, 45000.00, 75000.00),
+('Contador Senior', 2, 55000.00, 95000.00);
 PRINT 'Puestos creados.';
 GO
 

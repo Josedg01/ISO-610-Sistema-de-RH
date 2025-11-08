@@ -37,9 +37,9 @@
         <tbody>
           <tr v-for="ingreso in ingresos" :key="ingreso.id">
             <td>{{ ingreso.id }}</td>
-            <td>{{ ingreso.Nombre }}</td>
+            <td>{{ ingreso.nombre }}</td>
             <td>{{ ingreso.idEmpleado }}</td>
-            <td>{{ ingreso.Estado }}</td>
+            <td>{{ ingreso.estado }}</td>
             <td>
               <button class="btn-secondary">Editar</button>
               <button class="btn-danger">Eliminar</button>

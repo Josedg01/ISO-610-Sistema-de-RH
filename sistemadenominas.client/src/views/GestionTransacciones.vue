@@ -11,7 +11,7 @@
           <select id="empleado" v-model="nuevaTx.idEmpleado" required>
             <option disabled value="">Seleccione un empleado</option>
             <option v-for="emp in empleados" :key="emp.id" :value="emp.id">
-              {{ emp.Nombre }} ({{ emp.Cedula }})
+              {{ emp.nombre }} ({{ emp.cedula }})
             </option>
           </select>
         </div>
@@ -30,7 +30,7 @@
           <select id="conceptoIngreso" v-model="nuevaTx.ConceptoId" required>
             <option disabled value="">Seleccione un ingreso</option>
             <option v-for="ing in tiposIngresos" :key="ing.id" :value="ing.id">
-              {{ ing.Nombre }}
+              {{ ing.nombre }}
             </option>
           </select>
         </div>
@@ -40,7 +40,7 @@
           <select id="conceptoDeduccion" v-model="nuevaTx.ConceptoId" required>
             <option disabled value="">Seleccione una deducción</option>
             <option v-for="ded in tiposDeducciones" :key="ded.id" :value="ded.id">
-              {{ ded.Nombre }}
+              {{ ded.nombre }}
             </option>
           </select>
         </div>
@@ -83,12 +83,12 @@
         </thead>
         <tbody>
           <tr v-for="tx in transacciones" :key="tx.id">
-            <td>{{ new Date(tx.Fecha).toLocaleDateString() }}</td>
+            <td>{{ new Date(tx.fecha).toLocaleDateString() }}</td>
             <td>{{ getNombreEmpleado(tx.idEmpleado) }}</td>
-            <td>{{ tx.Tipo }}</td>
-            <td>{{ tx.Descripcion || 'N/A' }}</td>
-            <td>{{ formatCurrency(tx.Monto) }}</td>
-            <td>{{ tx.Estado }}</td>
+            <td>{{ tx.tipo }}</td>
+            <td>{{ tx.descripcion || 'N/A' }}</td>
+            <td>{{ formatCurrency(tx.monto) }}</td>
+            <td>{{ tx.estado }}</td>
             <td>
               <button class="btn-danger" @click="eliminarTransaccion(tx.id)">Eliminar</button>
             </td>
@@ -190,7 +190,7 @@ async function getTransacciones() {
     // Solo cargamos las pendientes para que la lista sea manejable
     const res = await fetch('/Transacciones');
     if (res.ok) {
-      transacciones.value = (await res.json()).filter((t: Transaccion) => t.Estado === 'Pendiente');
+      transacciones.value = (await res.json()).filter((t: Transaccion) => t.estado === 'Pendiente');
     }
   } catch (e) { console.error(e); }
   finally { loading.txs = false; }
@@ -204,7 +204,7 @@ function limpiarConcepto() {
 
 function getNombreEmpleado(id: number): string {
   const emp = empleados.value.find(e => e.id === id);
-  return emp ? emp.Nombre : `ID: ${id}`;
+  return emp ? emp.nombre : `ID: ${id}`;
 }
 
 function formatCurrency(value: number) {
