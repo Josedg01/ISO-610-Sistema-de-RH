@@ -40,6 +40,11 @@ const routes = [
     path: '/nomina',
     name: 'Nómina',
     component: () => import('../views/CalcularNomina.vue')
+  },
+  {
+    path: '/consulta',
+    name: 'Consulta',
+    component: () => import('../views/ConsultaEmpleados.vue')
   }
 ];
 

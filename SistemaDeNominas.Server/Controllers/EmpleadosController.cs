@@ -25,6 +25,27 @@ namespace SistemaDeNominas.Server.Controllers
             return Ok(e);
         }
 
+        [HttpGet("buscar")]
+        public async Task<IActionResult> Buscar([FromQuery] int? idDepartamento, [FromQuery] int? idPuesto)
+        {
+            var query = _db.Empleados.AsQueryable();
+
+            // Aplicamos filtro de Departamento si se envio
+            if (idDepartamento.HasValue)
+            {
+                query = query.Where(e => e.idDepartamento == idDepartamento.Value);
+            }
+
+            // Aplicamos filtro de Puesto si se envio
+            if (idPuesto.HasValue)
+            {
+                query = query.Where(e => e.idPuesto == idPuesto.Value);
+            }
+
+            var empleados = await query.ToListAsync();
+            return Ok(empleados);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(Empleado empleado)
         {

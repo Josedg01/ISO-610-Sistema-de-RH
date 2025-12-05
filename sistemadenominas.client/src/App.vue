@@ -10,6 +10,7 @@
           <router-link to="/ingresos">Tipos de Ingresos</router-link>
           <router-link to="/deducciones">Deducciones</router-link>
           <router-link to="/transacciones">Transacciones</router-link>
+          <router-link to="/consulta" class="link-consulta">Consultas</router-link>
           <router-link to="/nomina" class="link-nomina-calculo">Calcular Nómina</router-link>
         </nav>
       </div>
@@ -50,6 +51,7 @@
   nav {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap; /* Permitir que baje si hay muchos items */
   }
 
   nav a {
@@ -79,5 +81,9 @@
   .link-nomina-calculo {
     background-color: hsla(160, 100%, 37%, 0.2);
     font-weight: bold;
+  }
+
+  .link-consulta {
+    border: 1px solid hsla(160, 100%, 37%, 0.4);
   }
 </style>
