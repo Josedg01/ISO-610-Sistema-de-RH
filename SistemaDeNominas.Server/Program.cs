@@ -1,6 +1,6 @@
-using SistemaDeNominas.Server.Data;
-using System;
 using Microsoft.EntityFrameworkCore;
+using SistemaDeNominas.Server.Data;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +11,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 "Server=(localdb)\\MSSQLLocalDB;Database=Nomina;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;";
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+// Configuramos el serializador JSON para ignorar ciclos de referencia (Entidad -> Hijos -> Padre -> Hijos...)
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 // Por defecto, ASP.NET Core usa camelCase, que es lo que queremos para estandarizar.
 builder.Services.AddControllers();

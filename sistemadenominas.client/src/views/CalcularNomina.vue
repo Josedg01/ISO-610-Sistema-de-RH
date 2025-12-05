@@ -2,9 +2,10 @@
   <div class="calcular-nomina">
     <h2>Proceso de Cálculo de Nómina</h2>
 
-    <div classs="card form-card">
+    <div class="card form-card">
       <h3>Generar Nueva Nómina</h3>
-      <form @submit.prevent="generarNomina" class="form-generar">
+      <!-- Se cambia @submit por v-on:submit para evitar errores de parser -->
+      <form v-on:submit.prevent="generarNomina" class="form-generar">
         <div class="form-group">
           <label for="fechaInicio">Fecha de Inicio:</label>
           <input type="date" id="fechaInicio" v-model="rangoFechas.FechaInicio" required>
@@ -34,14 +35,20 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="nomina in nominas" :key="nomina.Id">
+          <tr v-for="nomina in nominas" :key="nomina.id">
             <td>{{ nomina.id }}</td>
             <td>{{ formatDate(nomina.fechaInicio) }} - {{ formatDate(nomina.fechaFin) }}</td>
             <td>{{ new Date(nomina.fechaCreacion).toLocaleString() }}</td>
             <td>{{ formatCurrency(nomina.totalCalculado) }}</td>
-            <td>{{ nomina.estado }}</td>
             <td>
-              <button class="btn-secondary" @click="verDetalle(nomina.Id)">Ver Detalle</button>
+              <span :class="{'badge-success': nomina.estado === 'Pagada', 'badge-info': nomina.estado === 'Calculada'}">
+                {{ nomina.estado }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn-secondary btn-sm" v-on:click="verDetalle(nomina.id)">Detalle</button>
+              <!-- BOTÓN NUEVO PARA IR AL REPORTE -->
+              <button class="btn-report btn-sm" v-on:click="verReporte(nomina.id)">📄 Reporte</button>
             </td>
           </tr>
         </tbody>
@@ -49,23 +56,26 @@
       <p v-if="!loading.historial && nominas.length === 0">No hay nóminas generadas.</p>
     </div>
 
+    <!-- Sección de Detalle Rápido (Vista Previa) -->
     <div class="card list-card" v-if="nominaSeleccionada">
-      <h3>Detalle de Nómina #{{ nominaSeleccionada.id }}</h3>
+      <div class="detalle-header">
+        <h3>Vista Previa: Detalle Nómina #{{ nominaSeleccionada.id }}</h3>
+        <button class="btn-close" v-on:click="nominaSeleccionada = null">X</button>
+      </div>
+      
       <div v-if="loading.detalle" class="loading">Cargando detalle...</div>
-      <table v-if="!loading.detalle && nominaSeleccionada.Detalles.length > 0">
+      <table v-if="!loading.detalle && nominaSeleccionada.detalles && nominaSeleccionada.detalles.length > 0">
         <thead>
           <tr>
-            <th>ID Empleado</th>
-            <th>Nombre</th>
+            <th>Empleado</th>
             <th>Salario Base</th>
-            <th>+ Ingresos Var.</th>
-            <th>- Deducciones Var.</th>
-            <th>= Neto a Pagar</th>
+            <th>+ Ingresos</th>
+            <th>- Deducciones</th>
+            <th>= Neto</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="detalle in nominaSeleccionada.Detalles" :key="detalle.Id">
-            <td>{{ detalle.idEmpleado }}</td>
+          <tr v-for="detalle in nominaSeleccionada.detalles" :key="detalle.id">
             <td>{{ detalle.empleado ? detalle.empleado.nombre : 'N/A' }}</td>
             <td>{{ formatCurrency(detalle.salarioBase) }}</td>
             <td>{{ formatCurrency(detalle.totalIngresos) }}</td>
@@ -80,36 +90,35 @@
 </template>
 
 <script setup lang="ts">
-
 import { ref, onMounted, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
 
 // --- Interfaces ---
 interface Nomina {
-  Id: number;
-  FechaInicio: string;
-  FechaFin: string;
-  FechaCreacion: string;
-  Estado: string;
-  TotalCalculado: number;
-  Detalles?: NominaDetalle[]; // Opcional
+  id: number;
+  fechaInicio: string;
+  fechaFin: string;
+  fechaCreacion: string;
+  estado: string;
+  totalCalculado: number;
+  detalles?: NominaDetalle[]; 
 }
 interface NominaDetalle {
-  Id: number;
+  id: number;
   idNomina: number;
   idEmpleado: number;
-  SalarioBase: number;
-  TotalIngresos: number;
-  TotalDeducciones: number;
-  NetoAPagar: number;
-  Empleado?: { Nombre: string }; // Incluimos el nombre
-}
-interface NominaCompleta extends Nomina {
-  Detalles: NominaDetalle[];
+  salarioBase: number;
+  totalIngresos: number;
+  totalDeducciones: number;
+  netoAPagar: number;
+  empleado?: { nombre: string }; 
 }
 
-// --- Estado (Reactivity) ---
-const nominas = ref<Nomina[]>([]); // Historial
-const nominaSeleccionada = ref<NominaCompleta | null>(null);
+// --- Estado ---
+const nominas = ref<Nomina[]>([]);
+const nominaSeleccionada = ref<Nomina | null>(null);
 
 const rangoFechas = ref({
   FechaInicio: '',
@@ -122,14 +131,14 @@ const loading = reactive({
   detalle: false
 });
 
-// --- Funciones de Carga ---
+// --- Carga ---
 onMounted(() => {
   getNominas();
 });
 
 async function getNominas() {
   loading.historial = true;
-  nominaSeleccionada.value = null; // Limpiar detalle al recargar historial
+  nominaSeleccionada.value = null;
   try {
     const res = await fetch('/CalculoNomina');
     if (res.ok) {
@@ -139,15 +148,17 @@ async function getNominas() {
   finally { loading.historial = false; }
 }
 
-// --- Funciones de UI (Helpers) ---
+// --- Helpers ---
 function formatCurrency(value: number) {
+  if(value === undefined || value === null) return 'RD$ 0.00';
   return value.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
 }
 function formatDate(dateString: string) {
+  if(!dateString) return '';
   return new Date(dateString).toLocaleDateString();
 }
 
-// --- Funciones de Proceso ---
+// --- Lógica Principal ---
 async function generarNomina() {
   if (!rangoFechas.value.FechaInicio || !rangoFechas.value.FechaFin) {
     alert('Debe seleccionar ambas fechas.');
@@ -155,7 +166,7 @@ async function generarNomina() {
   }
 
   loading.calculando = true;
-  nominaSeleccionada.value = null; // Ocultar detalle anterior
+  nominaSeleccionada.value = null;
 
   try {
     const response = await fetch('/CalculoNomina/generar', {
@@ -166,10 +177,10 @@ async function generarNomina() {
 
     if (response.ok) {
       const nominaGenerada = await response.json();
-      alert(`¡Nómina #${nominaGenerada.Id} generada exitosamente!`);
-      rangoFechas.value = { FechaInicio: '', FechaFin: '' }; // Limpiar formulario
-      await getNominas(); // Recargar el historial
-      await verDetalle(nominaGenerada.Id); // Mostrar el detalle de la nueva nómina
+      alert(`¡Nómina #${nominaGenerada.id} generada exitosamente!`);
+      // Limpiar y recargar
+      rangoFechas.value = { FechaInicio: '', FechaFin: '' };
+      await getNominas();
     } else {
       const error = await response.text();
       alert(`Error al generar nómina: ${error}`);
@@ -196,10 +207,15 @@ async function verDetalle(idNomina: number) {
   } finally {
     loading.detalle = false;
   }
-}</script>
+}
+
+// FUNCIÓN DE NAVEGACIÓN AL REPORTE
+function verReporte(idNomina: number) {
+  router.push(`/reporte-nomina/${idNomina}`);
+}
+</script>
 
 <style scoped>
-  /* Estilos consistentes */
   .calcular-nomina {
     display: flex;
     flex-direction: column;
@@ -211,12 +227,14 @@ async function verDetalle(idNomina: number) {
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   .form-generar {
     display: flex;
     gap: 1rem;
     align-items: flex-end;
+    flex-wrap: wrap;
   }
 
   .form-group {
@@ -241,10 +259,12 @@ async function verDetalle(idNomina: number) {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    transition: background 0.3s;
   }
 
   button:disabled {
     background-color: #ccc;
+    cursor: not-allowed;
   }
 
   .btn-primary {
@@ -255,6 +275,31 @@ async function verDetalle(idNomina: number) {
   .btn-secondary {
     background-color: #f0f0f0;
     color: #333;
+  }
+  
+  .btn-report {
+    background-color: #2c3e50;
+    color: white;
+    margin-left: 0.5rem;
+  }
+  
+  .btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-close {
+    background: transparent;
+    color: #999;
+    font-size: 1.2rem;
+    padding: 0;
+  }
+
+  .detalle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
   }
 
   table {
@@ -272,4 +317,11 @@ async function verDetalle(idNomina: number) {
   thead th {
     background-color: var(--color-background-mute);
   }
+
+  .actions-cell {
+    white-space: nowrap;
+  }
+
+  .badge-success { color: green; font-weight: bold; }
+  .badge-info { color: #007bff; font-weight: bold; }
 </style>

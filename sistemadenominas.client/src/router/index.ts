@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import GestionEmpleados from '../views/GestionEmpleados.vue'
 
 const routes = [
   {
@@ -9,7 +8,7 @@ const routes = [
   {
     path: '/empleados',
     name: 'Empleados',
-    component: GestionEmpleados
+    component: () => import('../views/GestionEmpleados.vue')
   },
   {
     path: '/departamentos',
@@ -40,6 +39,11 @@ const routes = [
     path: '/nomina',
     name: 'Nómina',
     component: () => import('../views/CalcularNomina.vue')
+  },
+  {
+    path: '/reporte-nomina/:id',
+    name: 'ReporteNomina',
+    component: () => import('../views/ReporteNomina.vue')
   },
   {
     path: '/consulta',
