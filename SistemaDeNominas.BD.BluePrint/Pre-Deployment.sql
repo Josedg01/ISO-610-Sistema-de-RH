@@ -77,7 +77,7 @@ IF NOT EXISTS (
     SELECT 1
     FROM INFORMATION_SCHEMA.TABLES
     WHERE TABLE_SCHEMA = 'dbo'
-      AND TABLE_NAME = 'TiposDeIngreso'
+      AND TABLE_NAME = 'TiposDeIngresos'
 )
 BEGIN
     CREATE TABLE [dbo].[TiposDeIngresos]
@@ -87,14 +87,14 @@ BEGIN
         [idEmpleado] INT NOT NULL, 
         [Estado] NVARCHAR(64) NOT NULL
     )
-    PRINT 'Tabla TiposDeIngreso creada'
+    PRINT 'Tabla TiposDeIngresos creada'
 END
 
 IF NOT EXISTS (
     SELECT 1
     FROM INFORMATION_SCHEMA.TABLES
     WHERE TABLE_SCHEMA = 'dbo'
-      AND TABLE_NAME = 'TiposDeDeduccion'
+      AND TABLE_NAME = 'TiposDeDeducciones'
 )
 BEGIN
     CREATE TABLE [dbo].[TiposDeDeducciones]
@@ -106,7 +106,7 @@ BEGIN
         [Porcentaje] DECIMAL(5, 2) NULL,
         [Estado] NVARCHAR(64) NOT NULL DEFAULT 'Activo'
     )
-    PRINT 'Tabla TiposDeDeduccion creada'
+    PRINT 'Tabla TiposDeDeducciones creada'
 END
 
 IF NOT EXISTS (
