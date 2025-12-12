@@ -21,8 +21,8 @@ namespace SistemaDeNominas.Server.Data
             base.OnModelCreating(modelBuilder);
 
             // Mapea las propiedades DbSet a los nombres de tabla SQL correctos
-            modelBuilder.Entity<TipodeIngresos>().ToTable("TiposDeIngresos");
-            modelBuilder.Entity<TipodeDeduccion>().ToTable("TiposDeDeducciones");
+            modelBuilder.Entity<TipodeIngresos>().ToTable("TiposDeIngreso");
+            modelBuilder.Entity<TipodeDeduccion>().ToTable("TiposDeDeduccion");
         }
     }
 }
