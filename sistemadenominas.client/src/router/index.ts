@@ -2,6 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/LoginView.vue'),
+    meta: { public: true }
+  },
+  {
     path: '/',
     redirect: '/empleados'
   },
@@ -55,6 +61,21 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+});
+
+// Guard de Navegación Global
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem('session_token');
+
+  if (!to.meta.public && !isAuthenticated) {
+    // Si la ruta no es pública y no hay token, enviar a Login
+    next({ name: 'Login' });
+  } else if (to.name === 'Login' && isAuthenticated) {
+    // Si intenta ir a Login pero ya está autenticado, enviar a Home
+    next({ path: '/' });
+  } else {
+    next();
+  }
 });
 
 export default router;
