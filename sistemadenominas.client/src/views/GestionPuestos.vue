@@ -3,25 +3,33 @@
     <h2>Gestión de Puestos</h2>
 
     <div class="card form-card">
-      <h3>Registrar Nuevo Puesto</h3>
-      <form @submit.prevent="crearPuesto">
+      <h3>{{ modoEdicion ? 'Editar Puesto' : 'Registrar Nuevo Puesto' }}</h3>
+      <form @submit.prevent="guardarPuesto">
         <div class="form-group">
           <label for="nombre">Nombre del Puesto:</label>
-          <input type="text" id="nombre" v-model="nuevoPuesto.Nombre" required>
+          <input type="text" id="nombre" v-model="puestoForm.nombre" required>
         </div>
         <div class="form-group">
           <label for="nivelRiesgo">Nivel de Riesgo (1-5):</label>
-          <input type="number" id="nivelRiesgo" v-model="nuevoPuesto.NivelDeRiesgo" min="1" max="5" required>
+          <input type="number" id="nivelRiesgo" v-model="puestoForm.nivelDeRiesgo" min="1" max="5" required>
         </div>
         <div class="form-group">
           <label for="minSalario">Salario Mínimo:</label>
-          <input type="number" step="0.01" id="minSalario" v-model="nuevoPuesto.MinimoSalario" required>
+          <input type="number" step="0.01" id="minSalario" v-model="puestoForm.minimoSalario" required>
         </div>
         <div class="form-group">
           <label for="maxSalario">Salario Máximo:</label>
-          <input type="number" step="0.01" id="maxSalario" v-model="nuevoPuesto.MaximoSalario" required>
+          <input type="number" step="0.01" id="maxSalario" v-model="puestoForm.maximoSalario" required>
         </div>
-        <button type="submit" class="btn-primary">Guardar Puesto</button>
+
+        <div class="button-group">
+          <button type="submit" class="btn-primary">
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button type="button" v-if="modoEdicion" @click="cancelarEdicion" class="btn-secondary">
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
 
@@ -47,8 +55,8 @@
             <td>{{ formatCurrency(puesto.minimoSalario) }}</td>
             <td>{{ formatCurrency(puesto.maximoSalario) }}</td>
             <td>
-              <button class="btn-secondary">Editar</button>
-              <button class="btn-danger">Eliminar</button>
+              <button class="btn-secondary btn-sm" @click="cargarEdicion(puesto)">Editar</button>
+              <button class="btn-danger btn-sm" @click="eliminarPuesto(puesto.id)">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -59,83 +67,105 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+  import { ref, onMounted, reactive } from 'vue'
 
-// Interface basada en el modelo Puestos.cs
-interface Puesto {
-  id: number;
-  Nombre: string;
-  NivelDeRiesgo: number;
-  MinimoSalario: number; // Coincide con el 'decimal' de C# (manejado como number en TS)
-  MaximoSalario: number;
-}
-
-const puestos = ref<Puesto[]>([]);
-const loading = ref(true);
-const nuevoPuesto = ref<Omit<Puesto, 'id'>>({
-  Nombre: '',
-  NivelDeRiesgo: 1,
-  MinimoSalario: 0,
-  MaximoSalario: 0,
-});
-
-// Helper para formatear moneda
-function formatCurrency(value: number) {
-  return value.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
-}
-
-async function getPuestos() {
-  loading.value = true;
-  try {
-    const response = await fetch('/Puestos'); // Llama al API
-    if (response.ok) {
-      puestos.value = await response.json();
-    } else {
-      console.error('Error al cargar puestos:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error de red:', error);
-  } finally {
-    loading.value = false;
+  interface Puesto {
+    id: number;
+    nombre: string;
+    nivelDeRiesgo: number;
+    minimoSalario: number;
+    maximoSalario: number;
   }
-}
 
-async function crearPuesto() {
-  try {
-    const response = await fetch('/Puestos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(nuevoPuesto.value),
-    });
+  const puestos = ref<Puesto[]>([]);
+  const loading = ref(true);
+  const modoEdicion = ref(false);
+  const idEnEdicion = ref<number | null>(null);
 
-    if (response.ok) {
-      // Limpiar formulario
-      nuevoPuesto.value = {
-        Nombre: '',
-        NivelDeRiesgo: 1,
-        MinimoSalario: 0,
-        MaximoSalario: 0,
-      };
-      // Recargar la lista
-      await getPuestos();
-    } else {
-      console.error('Error al crear puesto:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error de red:', error);
+  const puestoForm = reactive({
+    nombre: '',
+    nivelDeRiesgo: 1,
+    minimoSalario: 0,
+    maximoSalario: 0,
+  });
+
+  function formatCurrency(value: number) {
+    return (value || 0).toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
   }
-}
 
-// Cargar los datos cuando el componente se monte
-onMounted(() => {
-  getPuestos();
-});
+  async function getPuestos() {
+    loading.value = true;
+    try {
+      const response = await fetch('/Puestos');
+      if (response.ok) {
+        puestos.value = await response.json();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function guardarPuesto() {
+    const url = modoEdicion.value ? `/Puestos/${idEnEdicion.value}` : '/Puestos';
+    const method = modoEdicion.value ? 'PUT' : 'POST';
+    const bodyData = { ...puestoForm, id: modoEdicion.value ? idEnEdicion.value : 0 };
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (response.ok) {
+        cancelarEdicion();
+        await getPuestos();
+      } else {
+        alert('Error al guardar puesto.');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function eliminarPuesto(id: number) {
+    if (!confirm('¿Eliminar este puesto permanentemente?')) return;
+    try {
+      const res = await fetch(`/Puestos/${id}`, { method: 'DELETE' });
+      if (res.ok) await getPuestos();
+      else alert('Error al eliminar.');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function cargarEdicion(item: Puesto) {
+    modoEdicion.value = true;
+    idEnEdicion.value = item.id;
+    puestoForm.nombre = item.nombre;
+    puestoForm.nivelDeRiesgo = item.nivelDeRiesgo;
+    puestoForm.minimoSalario = item.minimoSalario;
+    puestoForm.maximoSalario = item.maximoSalario;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelarEdicion() {
+    modoEdicion.value = false;
+    idEnEdicion.value = null;
+    puestoForm.nombre = '';
+    puestoForm.nivelDeRiesgo = 1;
+    puestoForm.minimoSalario = 0;
+    puestoForm.maximoSalario = 0;
+  }
+
+  onMounted(() => {
+    getPuestos();
+  });
 </script>
 
 <style scoped>
-  /* Estilos consistentes con los otros módulos */
   .gestion-puestos {
     display: flex;
     flex-direction: column;
@@ -147,7 +177,6 @@ onMounted(() => {
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   .form-card form {
@@ -162,22 +191,26 @@ onMounted(() => {
     flex-direction: column;
   }
 
-  .form-group label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--color-text-light-2);
-  }
+    .form-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
 
-  .form-group input {
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-background);
-    color: var(--color-text);
+    .form-group input {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+
+  .button-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
   }
 
   button {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -187,19 +220,22 @@ onMounted(() => {
   .btn-primary {
     background-color: hsla(160, 100%, 37%, 1);
     color: white;
-    grid-column: 1 / 1;
-    margin-top: 1rem;
   }
 
   .btn-secondary {
-    background-color: #f0f0f0;
-    color: #333;
-    margin-right: 0.5rem;
+    background-color: #6c757d;
+    color: white;
   }
 
   .btn-danger {
-    background-color: #ffcccc;
-    color: #a00;
+    background-color: #dc3545;
+    color: white;
+    margin-left: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
   }
 
   table {
@@ -216,12 +252,10 @@ onMounted(() => {
 
   thead th {
     background-color: var(--color-background-mute);
-    color: var(--color-heading);
   }
 
   .loading {
     padding: 2rem;
     text-align: center;
-    color: var(--color-text-light-2);
   }
 </style>

@@ -3,29 +3,37 @@
     <h2>Gestión de Tipos de Deducciones</h2>
 
     <div class="card form-card">
-      <h3>Registrar Nueva Deducción</h3>
-      <form @submit.prevent="crearDeduccion">
+      <h3>{{ modoEdicion ? 'Editar Deducción' : 'Registrar Nueva Deducción' }}</h3>
+      <form @submit.prevent="guardarDeduccion">
         <div class="form-group">
           <label for="nombre">Nombre (Ej: AFP, ARS):</label>
-          <input type="text" id="nombre" v-model="nuevaDeduccion.Nombre" required>
+          <input type="text" id="nombre" v-model="deduccionForm.nombre" required>
         </div>
         <div class="form-group">
           <label for="descripcion">Descripción:</label>
-          <input type="text" id="descripcion" v-model="nuevaDeduccion.Descripcion">
+          <input type="text" id="descripcion" v-model="deduccionForm.descripcion">
         </div>
         <div class="form-group">
           <label for="montoFijo">Monto Fijo (RD$):</label>
-          <input type="number" step="0.01" id="montoFijo" v-model.number="nuevaDeduccion.MontoFijo">
+          <input type="number" step="0.01" id="montoFijo" v-model.number="deduccionForm.montoFijo">
         </div>
         <div class="form-group">
           <label for="porcentaje">Porcentaje (%):</label>
-          <input type="number" step="0.01" id="porcentaje" v-model.number="nuevaDeduccion.Porcentaje">
+          <input type="number" step="0.01" id="porcentaje" v-model.number="deduccionForm.porcentaje">
         </div>
-         <div class="form-group">
+        <div class="form-group">
           <label for="estado">Estado:</label>
-          <input type="text" id="estado" v-model="nuevaDeduccion.Estado" required>
+          <input type="text" id="estado" v-model="deduccionForm.estado" required>
         </div>
-        <button type="submit" class="btn-primary">Guardar Deducción</button>
+
+        <div class="button-group">
+          <button type="submit" class="btn-primary">
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button type="button" v-if="modoEdicion" @click="cancelarEdicion" class="btn-secondary">
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
 
@@ -51,8 +59,8 @@
             <td>{{ deduccion.porcentaje ? deduccion.porcentaje + '%' : 'N/A' }}</td>
             <td>{{ deduccion.estado }}</td>
             <td>
-              <button class="btn-secondary">Editar</button>
-              <button class="btn-danger">Eliminar</button>
+              <button class="btn-secondary btn-sm" @click="cargarEdicion(deduccion)">Editar</button>
+              <button class="btn-danger btn-sm" @click="eliminarDeduccion(deduccion.id)">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -63,93 +71,116 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+  import { ref, onMounted, reactive } from 'vue'
 
-// Interface basada en el modelo TipodeDeduccion.cs
-interface TipodeDeduccion {
-  id: number;
-  Nombre: string;
-  Descripcion?: string;
-  MontoFijo?: number;
-  Porcentaje?: number;
-  Estado: string;
-}
-
-const deducciones = ref<TipodeDeduccion[]>([]);
-const loading = ref(true);
-const nuevaDeduccion = ref<Omit<TipodeDeduccion, 'id'>>({
-  Nombre: '',
-  Descripcion: '',
-  MontoFijo: undefined,
-  Porcentaje: undefined,
-  Estado: 'Activo', // Valor por defecto
-});
-
-// Helper para formatear moneda
-function formatCurrency(value?: number) {
-  if (value === null || value === undefined) return 'N/A';
-  return value.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
-}
-
-async function getDeducciones() {
-  loading.value = true;
-  try {
-    const response = await fetch('/TiposDeDeducciones'); // Llama al nuevo API
-    if (response.ok) {
-      deducciones.value = await response.json();
-    } else {
-      console.error('Error al cargar deducciones:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error de red:', error);
-  } finally {
-    loading.value = false;
+  interface TipodeDeduccion {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+    montoFijo?: number;
+    porcentaje?: number;
+    estado: string;
   }
-}
 
-async function crearDeduccion() {
-  try {
+  const deducciones = ref<TipodeDeduccion[]>([]);
+  const loading = ref(true);
+  const modoEdicion = ref(false);
+  const idEnEdicion = ref<number | null>(null);
+
+  const deduccionForm = reactive({
+    nombre: '',
+    descripcion: '',
+    montoFijo: undefined as number | undefined,
+    porcentaje: undefined as number | undefined,
+    estado: 'Activo',
+  });
+
+  function formatCurrency(value?: number) {
+    if (value === null || value === undefined) return 'N/A';
+    return value.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
+  }
+
+  async function getDeducciones() {
+    loading.value = true;
+    try {
+      const response = await fetch('/TiposDeDeducciones');
+      if (response.ok) {
+        deducciones.value = await response.json();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function guardarDeduccion() {
+    const url = modoEdicion.value ? `/TiposDeDeducciones/${idEnEdicion.value}` : '/TiposDeDeducciones';
+    const method = modoEdicion.value ? 'PUT' : 'POST';
+
     const payload = {
-      ...nuevaDeduccion.value,
-      MontoFijo: nuevaDeduccion.value.MontoFijo || null,
-      Porcentaje: nuevaDeduccion.value.Porcentaje || null,
+      ...deduccionForm,
+      id: modoEdicion.value ? idEnEdicion.value : 0,
+      montoFijo: deduccionForm.montoFijo || null,
+      porcentaje: deduccionForm.porcentaje || null,
     };
-    
-    const response = await fetch('/TiposDeDeducciones', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
 
-    if (response.ok) {
-      // Limpiar formulario
-      nuevaDeduccion.value = {
-        Nombre: '',
-        Descripcion: '',
-        MontoFijo: undefined,
-        Porcentaje: undefined,
-        Estado: 'Activo',
-      };
-      // Recargar la lista
-      await getDeducciones();
-    } else {
-      console.error('Error al crear deducción:', response.statusText);
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        cancelarEdicion();
+        await getDeducciones();
+      } else {
+        alert('Error al guardar deducción.');
+      }
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error('Error de red:', error);
   }
-}
 
-// Cargar los datos cuando el componente se monte
-onMounted(() => {
-  getDeducciones();
-});
+  async function eliminarDeduccion(id: number) {
+    if (!confirm('¿Eliminar esta deducción?')) return;
+    try {
+      const res = await fetch(`/TiposDeDeducciones/${id}`, { method: 'DELETE' });
+      if (res.ok) await getDeducciones();
+      else alert('Error al eliminar.');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function cargarEdicion(item: TipodeDeduccion) {
+    modoEdicion.value = true;
+    idEnEdicion.value = item.id;
+    deduccionForm.nombre = item.nombre;
+    deduccionForm.descripcion = item.descripcion || '';
+    deduccionForm.montoFijo = item.montoFijo;
+    deduccionForm.porcentaje = item.porcentaje;
+    deduccionForm.estado = item.estado;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelarEdicion() {
+    modoEdicion.value = false;
+    idEnEdicion.value = null;
+    deduccionForm.nombre = '';
+    deduccionForm.descripcion = '';
+    deduccionForm.montoFijo = undefined;
+    deduccionForm.porcentaje = undefined;
+    deduccionForm.estado = 'Activo';
+  }
+
+  onMounted(() => {
+    getDeducciones();
+  });
 </script>
 
 <style scoped>
-  /* Estilos (copiados de tus otros componentes de gestión) */
   .gestion-deducciones {
     display: flex;
     flex-direction: column;
@@ -161,7 +192,6 @@ onMounted(() => {
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   .form-card form {
@@ -176,22 +206,26 @@ onMounted(() => {
     flex-direction: column;
   }
 
-  .form-group label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--color-text-light-2);
-  }
+    .form-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
 
-  .form-group input {
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-background);
-    color: var(--color-text);
+    .form-group input {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+
+  .button-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
   }
 
   button {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -201,19 +235,22 @@ onMounted(() => {
   .btn-primary {
     background-color: hsla(160, 100%, 37%, 1);
     color: white;
-    grid-column: 1 / 1;
-    margin-top: 1rem;
   }
 
   .btn-secondary {
-    background-color: #f0f0f0;
-    color: #333;
-    margin-right: 0.5rem;
+    background-color: #6c757d;
+    color: white;
   }
 
   .btn-danger {
-    background-color: #ffcccc;
-    color: #a00;
+    background-color: #dc3545;
+    color: white;
+    margin-left: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
   }
 
   table {
@@ -230,12 +267,10 @@ onMounted(() => {
 
   thead th {
     background-color: var(--color-background-mute);
-    color: var(--color-heading);
   }
 
   .loading {
     padding: 2rem;
     text-align: center;
-    color: var(--color-text-light-2);
   }
 </style>

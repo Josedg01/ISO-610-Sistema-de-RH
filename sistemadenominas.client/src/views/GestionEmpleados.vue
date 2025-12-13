@@ -3,33 +3,41 @@
     <h2>Gestión de Empleados</h2>
 
     <div class="card form-card">
-      <h3>Registrar Nuevo Empleado</h3>
-      <form @submit.prevent="crearEmpleado">
+      <h3>{{ modoEdicion ? 'Editar Empleado' : 'Registrar Nuevo Empleado' }}</h3>
+      <form @submit.prevent="guardarEmpleado">
         <div class="form-group">
           <label for="nombre">Nombre:</label>
-          <input type="text" id="nombre" v-model="nuevoEmpleado.Nombre" required>
+          <input type="text" id="nombre" v-model="empleadoForm.nombre" required>
         </div>
         <div class="form-group">
           <label for="cedula">Cédula:</label>
-          <input type="text" id="cedula" v-model="nuevoEmpleado.Cedula" required>
+          <input type="text" id="cedula" v-model="empleadoForm.cedula" required>
         </div>
         <div class="form-group">
           <label for="salario">Salario Mensual:</label>
-          <input type="number" id="salario" v-model="nuevoEmpleado.SalarioMensual" required>
+          <input type="number" id="salario" v-model="empleadoForm.salarioMensual" required>
         </div>
         <div class="form-group">
           <label for="idDepartamento">ID Depto:</label>
-          <input type="number" id="idDepartamento" v-model="nuevoEmpleado.idDepartamento" required>
+          <input type="number" id="idDepartamento" v-model="empleadoForm.idDepartamento" required>
         </div>
         <div class="form-group">
           <label for="idPuesto">ID Puesto:</label>
-          <input type="number" id="idPuesto" v-model="nuevoEmpleado.idPuesto" required>
+          <input type="number" id="idPuesto" v-model="empleadoForm.idPuesto" required>
         </div>
         <div class="form-group">
           <label for="idNomina">ID Nomina:</label>
-          <input type="number" id="idNomina" v-model="nuevoEmpleado.idNomina" required>
+          <input type="number" id="idNomina" v-model="empleadoForm.idNomina" required>
         </div>
-        <button type="submit" class="btn-primary">Guardar Empleado</button>
+
+        <div class="button-group">
+          <button type="submit" class="btn-primary">
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button type="button" v-if="modoEdicion" @click="cancelarEdicion" class="btn-secondary">
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
 
@@ -51,10 +59,10 @@
             <td>{{ empleado.id }}</td>
             <td>{{ empleado.nombre }}</td>
             <td>{{ empleado.cedula }}</td>
-            <td>{{ empleado.salarioMensual.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' }) }}</td>
+            <td>{{ formatCurrency(empleado.salarioMensual) }}</td>
             <td>
-              <button class="btn-secondary">Editar</button>
-              <button class="btn-danger">Eliminar</button>
+              <button class="btn-secondary btn-sm" @click="cargarEdicion(empleado)">Editar</button>
+              <button class="btn-danger btn-sm" @click="eliminarEmpleado(empleado.id)">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -65,83 +73,134 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+  import { ref, onMounted, reactive } from 'vue'
 
-// Interface basada en el modelo Empleado.cs
-interface Empleado {
-  id: number;
-  Cedula: string;
-  Nombre: string;
-  idDepartamento: number;
-  idPuesto: number;
-  SalarioMensual: number;
-  idNomina: number;
-}
-
-const empleados = ref<Empleado[]>([]);
-const loading = ref(true);
-const nuevoEmpleado = ref<Omit<Empleado, 'id'>>({
-  Nombre: '',
-  Cedula: '',
-  SalarioMensual: 0,
-  idDepartamento: 1, // Valor por defecto
-  idPuesto: 1, // Valor por defecto
-  idNomina: 1 // Valor por defecto
-});
-
-async function getEmpleados() {
-  loading.value = true;
-  try {
-    const response = await fetch('/Empleados'); // Llama al API
-    if (response.ok) {
-      empleados.value = await response.json();
-    } else {
-      console.error('Error al cargar empleados:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error de red:', error);
-  } finally {
-    loading.value = false;
+  interface Empleado {
+    id: number;
+    cedula: string;
+    nombre: string;
+    idDepartamento: number;
+    idPuesto: number;
+    salarioMensual: number;
+    idNomina: number;
   }
-}
 
-async function crearEmpleado() {
-  try {
-    const response = await fetch('/Empleados', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(nuevoEmpleado.value),
-    });
+  // Estado
+  const empleados = ref<Empleado[]>([]);
+  const loading = ref(true);
+  const modoEdicion = ref(false);
+  const idEnEdicion = ref<number | null>(null);
 
-    if (response.ok) {
-      // Limpiar formulario
-      nuevoEmpleado.value = {
-        Nombre: '',
-        Cedula: '',
-        SalarioMensual: 0,
-        idDepartamento: 1,
-        idPuesto: 1,
-        idNomina: 1
-      };
-      // Recargar la lista
-      await getEmpleados();
-    } else {
-      console.error('Error al crear empleado:', response.statusText);
+  // Formulario reactivo
+  const empleadoForm = reactive({
+    nombre: '',
+    cedula: '',
+    salarioMensual: 0,
+    idDepartamento: 1,
+    idPuesto: 1,
+    idNomina: 1
+  });
+
+  // --- Funciones CRUD ---
+
+  async function getEmpleados() {
+    loading.value = true;
+    try {
+      const response = await fetch('/Empleados');
+      if (response.ok) {
+        empleados.value = await response.json();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      loading.value = false;
     }
-  } catch (error) {
-    console.error('Error de red:', error);
   }
-}
 
-// Cargar los datos cuando el componente se monte
-onMounted(() => {
-  getEmpleados();
-});
+  async function guardarEmpleado() {
+    const url = modoEdicion.value ? `/Empleados/${idEnEdicion.value}` : '/Empleados';
+    const method = modoEdicion.value ? 'PUT' : 'POST';
+
+    // Si es PUT, necesitamos enviar el ID en el cuerpo también según tu controlador
+    const bodyData = {
+      ...empleadoForm,
+      id: modoEdicion.value ? idEnEdicion.value : 0
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (response.ok) {
+        cancelarEdicion(); // Resetea el form
+        await getEmpleados(); // Recarga la lista
+      } else {
+        const errorText = await response.text();
+        alert('Error al guardar: ' + errorText);
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+    }
+  }
+
+  async function eliminarEmpleado(id: number) {
+    if (!confirm('¿Está seguro de eliminar este empleado? Esta acción no se puede deshacer.')) return;
+
+    try {
+      const response = await fetch(`/Empleados/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        await getEmpleados();
+      } else {
+        alert('Error al eliminar empleado.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  // --- Helpers de UI ---
+
+  function cargarEdicion(emp: Empleado) {
+    modoEdicion.value = true;
+    idEnEdicion.value = emp.id;
+    // Copiamos datos al form
+    empleadoForm.nombre = emp.nombre;
+    empleadoForm.cedula = emp.cedula;
+    empleadoForm.salarioMensual = emp.salarioMensual;
+    empleadoForm.idDepartamento = emp.idDepartamento;
+    empleadoForm.idPuesto = emp.idPuesto;
+    empleadoForm.idNomina = emp.idNomina;
+
+    // Scroll hacia el formulario
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelarEdicion() {
+    modoEdicion.value = false;
+    idEnEdicion.value = null;
+    // Reset form
+    empleadoForm.nombre = '';
+    empleadoForm.cedula = '';
+    empleadoForm.salarioMensual = 0;
+    empleadoForm.idDepartamento = 1;
+    empleadoForm.idPuesto = 1;
+    empleadoForm.idNomina = 1;
+  }
+
+  function formatCurrency(value: number) {
+    return (value || 0).toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
+  }
+
+  onMounted(() => {
+    getEmpleados();
+  });
 </script>
 
 <style scoped>
+  /* Reutilizamos estilos previos y agregamos button-group */
   .gestion-empleados {
     display: flex;
     flex-direction: column;
@@ -153,7 +212,6 @@ onMounted(() => {
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   .form-card form {
@@ -168,22 +226,26 @@ onMounted(() => {
     flex-direction: column;
   }
 
-  .form-group label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--color-text-light-2);
-  }
+    .form-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
 
-  .form-group input {
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-background);
-    color: var(--color-text);
+    .form-group input {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+
+  .button-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
   }
 
   button {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -193,19 +255,22 @@ onMounted(() => {
   .btn-primary {
     background-color: hsla(160, 100%, 37%, 1);
     color: white;
-    grid-column: 1 / 1;
-    margin-top: 1rem;
   }
 
   .btn-secondary {
-    background-color: #f0f0f0;
-    color: #333;
-    margin-right: 0.5rem;
+    background-color: #6c757d;
+    color: white;
   }
 
   .btn-danger {
-    background-color: #ffcccc;
-    color: #a00;
+    background-color: #dc3545;
+    color: white;
+    margin-left: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
   }
 
   table {
@@ -222,12 +287,10 @@ onMounted(() => {
 
   thead th {
     background-color: var(--color-background-mute);
-    color: var(--color-heading);
   }
 
   .loading {
     padding: 2rem;
     text-align: center;
-    color: var(--color-text-light-2);
   }
 </style>

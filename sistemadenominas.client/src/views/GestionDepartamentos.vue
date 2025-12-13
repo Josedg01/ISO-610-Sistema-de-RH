@@ -3,21 +3,29 @@
     <h2>Gestión de Departamentos</h2>
 
     <div class="card form-card">
-      <h3>Registrar Nuevo Departamento</h3>
-      <form @submit.prevent="crearDepartamento">
+      <h3>{{ modoEdicion ? 'Editar Departamento' : 'Registrar Nuevo Departamento' }}</h3>
+      <form @submit.prevent="guardarDepartamento">
         <div class="form-group">
           <label for="nombre">Nombre:</label>
-          <input type="text" id="nombre" v-model="nuevoDepto.Nombre" required>
+          <input type="text" id="nombre" v-model="deptoForm.nombre" required>
         </div>
         <div class="form-group">
           <label for="ubicacion">Ubicación Física:</label>
-          <input type="text" id="ubicacion" v-model="nuevoDepto.UbicacionFisica" required>
+          <input type="text" id="ubicacion" v-model="deptoForm.ubicacionFisica" required>
         </div>
         <div class="form-group">
           <label for="idResponsable">ID Responsable Área:</label>
-          <input type="number" id="idResponsable" v-model="nuevoDepto.idResponsableArea" required>
+          <input type="number" id="idResponsable" v-model="deptoForm.idResponsableArea" required>
         </div>
-        <button type="submit" class="btn-primary">Guardar Departamento</button>
+
+        <div class="button-group">
+          <button type="submit" class="btn-primary">
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button type="button" v-if="modoEdicion" @click="cancelarEdicion" class="btn-secondary">
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
 
@@ -41,8 +49,8 @@
             <td>{{ depto.ubicacionFisica }}</td>
             <td>{{ depto.idResponsableArea }}</td>
             <td>
-              <button class="btn-secondary">Editar</button>
-              <button class="btn-danger">Eliminar</button>
+              <button class="btn-secondary btn-sm" @click="cargarEdicion(depto)">Editar</button>
+              <button class="btn-danger btn-sm" @click="eliminarDepartamento(depto.id)">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -53,74 +61,102 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+  import { ref, onMounted, reactive } from 'vue'
 
-// Interface basada en el modelo Departamento.cs
-interface Departamento {
-  id: number;
-  Nombre: string;
-  UbicacionFisica: string;
-  idResponsableArea: number;
-}
-
-const departamentos = ref<Departamento[]>([]);
-const loading = ref(true);
-const nuevoDepto = ref<Omit<Departamento, 'id'>>({
-  Nombre: '',
-  UbicacionFisica: '',
-  idResponsableArea: 0,
-});
-
-async function getDepartamentos() {
-  loading.value = true;
-  try {
-    const response = await fetch('/Departamentos'); // Llama al API
-    if (response.ok) {
-      departamentos.value = await response.json();
-    } else {
-      console.error('Error al cargar departamentos:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error de red:', error);
-  } finally {
-    loading.value = false;
+  interface Departamento {
+    id: number;
+    nombre: string;
+    ubicacionFisica: string;
+    idResponsableArea: number;
   }
-}
 
-async function crearDepartamento() {
-  try {
-    const response = await fetch('/Departamentos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(nuevoDepto.value),
-    });
+  const departamentos = ref<Departamento[]>([]);
+  const loading = ref(true);
+  const modoEdicion = ref(false);
+  const idEnEdicion = ref<number | null>(null);
 
-    if (response.ok) {
-      // Limpiar formulario
-      nuevoDepto.value = {
-        Nombre: '',
-        UbicacionFisica: '',
-        idResponsableArea: 0,
-      };
-      // Recargar la lista
-      await getDepartamentos();
-    } else {
-      console.error('Error al crear departamento:', response.statusText);
+  const deptoForm = reactive({
+    nombre: '',
+    ubicacionFisica: '',
+    idResponsableArea: 0,
+  });
+
+  async function getDepartamentos() {
+    loading.value = true;
+    try {
+      const response = await fetch('/Departamentos');
+      if (response.ok) {
+        departamentos.value = await response.json();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
     }
-  } catch (error) {
-    console.error('Error de red:', error);
   }
-}
 
-onMounted(() => {
-  getDepartamentos();
-});
+  async function guardarDepartamento() {
+    const url = modoEdicion.value ? `/Departamentos/${idEnEdicion.value}` : '/Departamentos';
+    const method = modoEdicion.value ? 'PUT' : 'POST';
+
+    const bodyData = {
+      ...deptoForm,
+      id: modoEdicion.value ? idEnEdicion.value : 0
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (response.ok) {
+        cancelarEdicion();
+        await getDepartamentos();
+      } else {
+        const msg = await response.text();
+        alert('Error: ' + msg);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function eliminarDepartamento(id: number) {
+    if (!confirm('¿Seguro que desea eliminar este departamento?')) return;
+    try {
+      const res = await fetch(`/Departamentos/${id}`, { method: 'DELETE' });
+      if (res.ok) await getDepartamentos();
+      else alert('No se pudo eliminar el departamento.');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function cargarEdicion(item: Departamento) {
+    modoEdicion.value = true;
+    idEnEdicion.value = item.id;
+    deptoForm.nombre = item.nombre;
+    deptoForm.ubicacionFisica = item.ubicacionFisica;
+    deptoForm.idResponsableArea = item.idResponsableArea;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelarEdicion() {
+    modoEdicion.value = false;
+    idEnEdicion.value = null;
+    deptoForm.nombre = '';
+    deptoForm.ubicacionFisica = '';
+    deptoForm.idResponsableArea = 0;
+  }
+
+  onMounted(() => {
+    getDepartamentos();
+  });
 </script>
 
 <style scoped>
-  /* Estilos copiados de GestionEmpleados.vue */
   .gestion-departamentos {
     display: flex;
     flex-direction: column;
@@ -132,7 +168,6 @@ onMounted(() => {
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   .form-card form {
@@ -147,22 +182,26 @@ onMounted(() => {
     flex-direction: column;
   }
 
-  .form-group label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--color-text-light-2);
-  }
+    .form-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
 
-  .form-group input {
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-background);
-    color: var(--color-text);
+    .form-group input {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+
+  .button-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
   }
 
   button {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -172,19 +211,22 @@ onMounted(() => {
   .btn-primary {
     background-color: hsla(160, 100%, 37%, 1);
     color: white;
-    grid-column: 1 / 1;
-    margin-top: 1rem;
   }
 
   .btn-secondary {
-    background-color: #f0f0f0;
-    color: #333;
-    margin-right: 0.5rem;
+    background-color: #6c757d;
+    color: white;
   }
 
   .btn-danger {
-    background-color: #ffcccc;
-    color: #a00;
+    background-color: #dc3545;
+    color: white;
+    margin-left: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
   }
 
   table {
@@ -201,12 +243,10 @@ onMounted(() => {
 
   thead th {
     background-color: var(--color-background-mute);
-    color: var(--color-heading);
   }
 
   .loading {
     padding: 2rem;
     text-align: center;
-    color: var(--color-text-light-2);
   }
 </style>
